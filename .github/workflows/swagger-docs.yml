@@ -1,12 +1,12 @@
 name: Deploy Swagger to GitHub Pages
 
-# Trigger the action on push and on a schedule (e.g., every 5 minutes)
 on:
   push:
     branches:
       - main
   schedule:
-    - cron: '*/1 * * * *'  # Runs every 5 minutes (change this to your desired frequency)
+    - cron: '*/15 * * * *'  # Runs every 15 minutes
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   deploy:
@@ -15,35 +15,41 @@ jobs:
     steps:
       - name: Checkout swagger-docs-auctions Repo
         uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Checkout pwp_ah Repo (tonttu-hypermedia)
+        uses: actions/checkout@v3
+        with:
+          repository: toni-kolehmainen/pwp_ah
+          ref: tonttu-hypermedia
+          path: pwp_ah
+          token: ${{ secrets.MY_GITHUB_PAT }}
 
       - name: Set up Git
         run: |
           git config --global user.name 'hrhm47'
           git config --global user.email 'haseebr470@gmail.com'
 
-      - name: Clone pwp_ah Repo (tonttu-hypermedia)
-        run: |
-          git clone https://x-access-token:${{ secrets.MY_GITHUB_PAT }}@github.com/hrhm47/tonttu-hypermedia.git
-
       - name: Copy Swagger Docs
         run: |
           echo "Copying Swagger docs..."
-          rm -rf swagger-docs-auctions/docs/components
-          rm -rf swagger-docs-auctions/docs/paths
-          cp -r tonttu-hypermedia/server/docs/components swagger-docs-auctions/docs/
-          cp -r tonttu-hypermedia/server/docs/paths swagger-docs-auctions/docs/
-          cp tonttu-hypermedia/server/docs/swagger.yaml swagger-docs-auctions/docs/
+          rm -rf docs/components
+          rm -rf docs/paths
+          mkdir -p docs
+          cp -r pwp_ah/server/docs/components docs/
+          cp -r pwp_ah/server/docs/paths docs/
+          cp pwp_ah/server/docs/swagger.yaml docs/
 
       - name: Commit and Push Changes
         run: |
-          cd swagger-docs-auctions
           git add .
-          git commit -m "Update Swagger documentation from tonttu repo" || echo "No changes to commit"
+          git commit -m "Update Swagger documentation from pwp_ah tonttu-hypermedia" || echo "No changes to commit"
           git push origin main || echo "No changes to push"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}  # Use the default GitHub token for deployment
-          publish_dir: ./swagger-docs-auctions/docs
+          github_token: ${{ secrets.MY_GITHUB_PAT }}  # Use PAT for deployment to ensure permissions
+          publish_dir: ./docs
           publish_branch: main
