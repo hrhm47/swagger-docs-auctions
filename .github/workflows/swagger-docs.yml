@@ -42,16 +42,17 @@ jobs:
         run: |
           echo "Copying Swagger docs..."
           mkdir -p docs
-          # Copy swagger.yaml from pwp_ah
           cp pwp_ah/server/docs/swagger.yaml docs/swagger.yaml
-          # Optionally copy components and paths if needed by Swagger UI
-          # cp -r pwp_ah/server/docs/components docs/components
-          # cp -r pwp_ah/server/docs/paths docs/paths
-          # Ensure dist folder is preserved (already in repo)
+          # dist/ is preserved as-is
+
+      - name: Debug Docs After Copying
+        run: |
+          echo "Contents of docs after copying:"
+          ls -R docs
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.MY_GITHUB_PAT }}
           publish_dir: ./docs
-          publish_branch: gh-pages  # Deploy to gh-pages branch
+          publish_branch: gh-pages
