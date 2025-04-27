@@ -1,0 +1,63 @@
+name: Deploy Swagger to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '*/15 * * * *'  # Runs every 15 minutes
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout swagger-docs-auctions Repo
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - name: Checkout pwp_ah Repo (tonttu-hypermedia)
+        uses: actions/checkout@v3
+        with:
+          repository: toni-kolehmainen/pwp_ah
+          ref: tonttu-hypermedia
+          path: pwp_ah
+          token: ${{ secrets.MY_GITHUB_PAT }}
+
+      - name: Debug Repository Contents
+        run: |
+          echo "Contents of pwp_ah/server/docs:"
+          ls -R pwp_ah/server/docs || echo "pwp_ah/server/docs directory empty or not cloned"
+          echo "Contents of docs:"
+          ls -R docs || echo "docs directory empty"
+
+      - name: Set up Git
+        run: |
+          git config --global user.name 'hrhm47'
+          git config --global user.email 'haseebr470@gmail.com'
+
+      - name: Copy Swagger Docs
+        run: |
+          echo "Copying Swagger docs..."
+          mkdir -p docs
+          # Copy swagger.yaml from pwp_ah
+          cp pwp_ah/server/docs/swagger.yaml docs/swagger.yaml
+          # Optionally copy components and paths if needed by Swagger UI
+          # cp -r pwp_ah/server/docs/components docs/components
+          # cp -r pwp_ah/server/docs/paths docs/paths
+          # Ensure dist folder is preserved (already in repo)
+
+      - name: Commit and Push Changes
+        run: |
+          git add .
+          git commit -m "Update Swagger documentation from pwp_ah tonttu-hypermedia" || echo "No changes to commit"
+          git push origin main || echo "No changes to push"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.MY_GITHUB_PAT }}
+          publish_dir: ./docs
+          publish_branch: main
