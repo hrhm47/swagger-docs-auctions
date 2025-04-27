@@ -42,9 +42,9 @@ jobs:
         run: |
           echo "Copying Swagger docs..."
           mkdir -p docs
-          # Copy swagger.yaml from pwp_ah
-          cp pwp_ah/server/docs/swagger.yaml docs/swagger.yaml
-          # Copy dist contents to docs root
+          # Copy entire docs folder from pwp_ah
+          cp -r pwp_ah/server/docs/* docs/
+          # Copy dist contents to docs root for Swagger UI
           cp -r docs/dist/* docs/
           # Remove dist folder to avoid deploying it
           rm -rf docs/dist
