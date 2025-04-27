@@ -6,7 +6,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '*/5 * * * *'  # Runs every 5 minutes (change this to your desired frequency, e.g., '*/3 * * * *' for 3 minutes)
+    - cron: '*/1 * * * *'  # Runs every 5 minutes (change this to your desired frequency)
 
 jobs:
   deploy:
@@ -44,6 +44,6 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
-          github_token: ${{ secrets.MY_GITHUB_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}  # Use the default GitHub token for deployment
           publish_dir: ./swagger-docs-auctions/docs
           publish_branch: main
