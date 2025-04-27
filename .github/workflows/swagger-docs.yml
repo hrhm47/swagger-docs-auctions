@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: '*/1 * * * *'  # Runs every 15 minutes
+    - cron: '*/15 * * * *'  # Runs every 15 minutes
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -46,9 +46,8 @@ jobs:
           cp pwp_ah/server/docs/swagger.yaml docs/swagger.yaml
           # Copy dist contents to docs root
           cp -r docs/dist/* docs/
-          # Optionally copy components and paths if needed
-          # cp -r pwp_ah/server/docs/components docs/components
-          # cp -r pwp_ah/server/docs/paths docs/paths
+          # Remove dist folder to avoid deploying it
+          rm -rf docs/dist
 
       - name: Debug Docs After Copying
         run: |
